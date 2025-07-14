@@ -1,17 +1,41 @@
-# Event Management Backend API
+# 📘 イベント管理アプリ (Event Management Application)
 
 [![Java](https://img.shields.io/badge/Java-17-blue.svg)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.0-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![MyBatis](https://img.shields.io/badge/MyBatis-3.0.3-orange.svg)](https://mybatis.org/)
 [![Oracle](https://img.shields.io/badge/Oracle-Database-red.svg)](https://www.oracle.com/database/)
 
-イベント管理システムのバックエンドAPI（Spring Boot + MyBatis + Oracle）
+## ✅ アプリの目的
+参加者がWeb上でイベントを閲覧・申し込みし、主催者がイベントと参加者を管理できるアプリ。  
+Azure App Service、Oracle Database、Blob Storage、AD B2C連携の実験対象にも適用可能。
+
+**🎯 現在の実装状況**: バックエンドAPI完全実装済み（Spring Boot + MyBatis + Oracle）
 
 ## 概要
 
-このプロジェクトは、イベント管理システムのバックエンドAPIを提供します。REST APIベースで、イベントの作成、更新、削除、検索機能を提供します。
+このプロジェクトは、イベント管理システムの完全なバックエンドAPIを提供します。REST APIベースで、イベントの作成、更新、削除、検索機能を提供します。
 
-## 技術スタック
+## 🚀 実装済み機能
+
+- ✅ イベント管理（CRUD操作）
+- ✅ ステータス別イベント検索（ACTIVE, COMPLETED, CANCELLED）
+- ✅ 主催者別イベント検索
+- ✅ イベント統計情報
+- ✅ OpenAPI/Swagger ドキュメント生成
+- ✅ バリデーション機能
+- ✅ エラーハンドリング
+- ✅ 単体テスト（コントローラー層100%カバレッジ）
+
+## 🏛️ システム構成（サーバーサイド）
+
+| 層 | 使用技術 | 説明 |
+|--|--|--|
+| Controller | Spring Web (REST API) | /api/events エンドポイント |
+| Service | Spring Service | ビジネスロジック（重複チェック、検証など） |
+| Repository | MyBatis (XML Mapper) | Oracle DBとの接続（SQLはXMLに記述） |
+| DB | Oracle Database | events テーブル |
+
+## 🚀 技術スタック
 
 - **Java**: 17
 - **Spring Boot**: 3.2.0
@@ -20,17 +44,7 @@
 - **Maven**: 3.8+
 - **OpenAPI/Swagger**: 2.2.0
 
-## 機能
-
-- ✅ イベント管理（CRUD操作）
-- ✅ ステータス別イベント検索
-- ✅ 主催者別イベント検索
-- ✅ イベント統計情報
-- ✅ OpenAPI/Swagger ドキュメント生成
-- ✅ バリデーション機能
-- ✅ エラーハンドリング
-
-## API エンドポイント
+## 📋 API エンドポイント
 
 ### ベースURL
 ```
@@ -50,22 +64,51 @@ http://localhost:8080/api
 | PUT | `/events/{id}` | イベント更新 |
 | DELETE | `/events/{id}` | イベント削除 |
 
-## セットアップ
+## 📂 実装済みディレクトリ構成
 
-### 前提条件
+```
+src/
+├── main/java/com/eventmanagement/
+│   ├── controller/
+│   │   └── EventController.java          # REST Controllers
+│   ├── service/
+│   │   └── EventService.java            # Business Logic
+│   ├── mapper/
+│   │   └── EventMapper.java             # MyBatis Mappers
+│   ├── entity/
+│   │   └── Event.java                   # Domain Models
+│   ├── dto/
+│   │   ├── EventRequest.java            # Request DTOs
+│   │   └── ApiResponse.java             # Response DTOs
+│   ├── config/
+│   │   └── SwaggerConfig.java           # Configuration Classes
+│   └── EventManagementApplication.java  # Main Application
+├── resources/
+│   ├── mappers/
+│   │   └── EventMapper.xml              # MyBatis XML Mappers
+│   ├── schema.sql                       # Database Schema
+│   └── application.properties           # Application Configuration
+└── test/
+    └── java/com/eventmanagement/
+        └── controller/
+            └── EventControllerTest.java  # Controller Tests
+```
 
+## 🛠️ セットアップ手順
+
+### 1. 前提条件
 - Java 17以上
 - Maven 3.8以上
 - Oracle Database 19c以上
 
-### 1. プロジェクトのクローン
+### 2. プロジェクトのクローン
 
 ```bash
 git clone https://github.com/kurodaya417/EventManagement.git
 cd EventManagement
 ```
 
-### 2. データベース設定
+### 3. データベース設定
 
 Oracle Databaseを起動し、以下のスクリプトを実行してスキーマを作成:
 
@@ -73,7 +116,7 @@ Oracle Databaseを起動し、以下のスクリプトを実行してスキー�
 -- src/main/resources/schema.sql を参照
 ```
 
-### 3. アプリケーション設定
+### 4. アプリケーション設定
 
 `src/main/resources/application.properties` でデータベース接続情報を設定:
 
@@ -83,7 +126,7 @@ spring.datasource.username=your_username
 spring.datasource.password=your_password
 ```
 
-### 4. ビルドと実行
+### 5. ビルドと実行
 
 ```bash
 # プロジェクトのビルド
@@ -96,14 +139,14 @@ mvn test
 mvn spring-boot:run
 ```
 
-## API ドキュメント
+## 📚 API ドキュメント
 
 アプリケーション起動後、以下のURLでAPI ドキュメントを確認できます：
 
 - **Swagger UI**: http://localhost:8080/api/swagger-ui.html
 - **OpenAPI仕様**: http://localhost:8080/api/docs
 
-## 使用例
+## 📋 使用例
 
 ### イベント作成
 
@@ -127,7 +170,7 @@ curl -X POST http://localhost:8080/api/events \
 curl http://localhost:8080/api/events
 ```
 
-## データベーススキーマ
+## 💾 データベーススキーマ
 
 ```sql
 CREATE TABLE events (
@@ -144,30 +187,22 @@ CREATE TABLE events (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- シーケンス
+CREATE SEQUENCE event_seq START WITH 1 INCREMENT BY 1;
+
+-- トリガー
+CREATE OR REPLACE TRIGGER event_trigger
+  BEFORE INSERT ON events
+  FOR EACH ROW
+BEGIN
+  :NEW.event_id := event_seq.NEXTVAL;
+  :NEW.created_at := CURRENT_TIMESTAMP;
+  :NEW.updated_at := CURRENT_TIMESTAMP;
+END;
 ```
 
-## プロジェクト構成
-
-```
-src/
-├── main/
-│   ├── java/com/eventmanagement/
-│   │   ├── controller/         # REST Controllers
-│   │   ├── service/           # Business Logic
-│   │   ├── mapper/            # MyBatis Mappers
-│   │   ├── entity/            # Domain Models
-│   │   ├── dto/               # Data Transfer Objects
-│   │   └── config/            # Configuration Classes
-│   └── resources/
-│       ├── mappers/           # MyBatis XML Mappers
-│       ├── schema.sql         # Database Schema
-│       └── application.properties
-└── test/
-    └── java/com/eventmanagement/
-        └── controller/        # Controller Tests
-```
-
-## テスト
+## 🧪 テスト
 
 ```bash
 # 全テストの実行
@@ -175,9 +210,12 @@ mvn test
 
 # 特定のテストクラスの実行
 mvn test -Dtest=EventControllerTest
+
+# テストカバレッジの確認
+mvn test jacoco:report
 ```
 
-## 監視・ヘルスチェック
+## 📊 監視・ヘルスチェック
 
 Spring Boot Actuatorを使用してヘルスチェックが可能です：
 
@@ -189,15 +227,38 @@ curl http://localhost:8080/api/actuator/health
 curl http://localhost:8080/api/actuator/info
 ```
 
-## 将来的な拡張
+## 🌐 Azure対応
 
-- 🔐 認証・認可機能（Azure AD B2C連携）
-- 📧 イベント通知機能
-- 👥 参加者管理機能
-- 📊 詳細レポート機能
-- 💾 Redis キャッシュ機能
+本アプリケーションは以下のAzureサービスとの連携に対応：
 
-## 詳細設計書
+- **Azure App Service** - Webアプリケーションホスティング
+- **Oracle Database** - データベース
+- **Azure Blob Storage** - ファイルストレージ
+- **Azure AD B2C** - 認証・認可
+
+## 📈 今後の拡張予定
+
+### 完了済み ✅
+- [x] バックエンドAPI詳細設計と実装
+- [x] Spring Boot + MyBatis + Oracle統合
+- [x] OpenAPIドキュメント自動生成
+- [x] 単体テスト実装
+- [x] バリデーション機能
+- [x] エラーハンドリング
+- [x] 統計情報API
+
+### 計画中 📋
+- [ ] UIデザイン案の実装
+- [ ] 参加者管理機能（/api/participation）
+- [ ] Azureへのデプロイ手順の整備
+- [ ] 検索機能の拡張
+- [ ] CSV出力機能の追加
+- [ ] Azure AD B2C連携
+- [ ] Blob Storage連携
+- [ ] イベント通知機能
+- [ ] Redis キャッシュ機能
+
+## 📖 詳細設計書
 
 より詳細なAPI仕様については、[API詳細設計書](docs/API_SPECIFICATION.md)を参照してください。
 
