@@ -1,5 +1,8 @@
-# Maven build artifacts
+# Maven
 target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
@@ -8,7 +11,7 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
-.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
 
 # IDE files
 .idea/
@@ -19,6 +22,13 @@ buildNumber.properties
 .settings/
 .project
 .classpath
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
 
 # OS generated files
 .DS_Store
@@ -33,17 +43,38 @@ Thumbs.db
 logs/
 *.log
 
-# Application specific
-application-local.properties
+# Database
+*.db
+*.sqlite
+
+# Application properties (if containing sensitive data)
 application-prod.properties
+application-local.properties
+local.properties
+
+# Compiled class files
+*.class
+
+# Package Files
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
 
 # Temporary files
 *.tmp
+*.temp
 *.bak
 *.swp
 *~.nib
-local.properties
+
+# JaCoCo
+*.exec
 
 # Oracle specific
 *.dmp
-*.log
