@@ -18,110 +18,72 @@
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
-    <!-- Find All Events -->
+    <!-- Base Select Fields -->
+    <sql id="baseSelectFields">
+        event_id, event_name, description, start_date_time, end_date_time, 
+        location, organizer, max_participants, current_participants, 
+        status, created_at, updated_at
+    </sql>
+
+    <!-- Base Where Clause -->
+    <sql id="baseWhereClause">
+        <where>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+            <if test="organizer != null">
+                AND organizer = #{organizer}
+            </if>
+            <if test="eventName != null">
+                AND event_name LIKE '%' || #{eventName} || '%'
+            </if>
+        </where>
+    </sql>
+
+    <!-- Select All Events -->
     <select id="findAll" resultMap="EventResultMap">
         SELECT 
-            event_id,
-            event_name,
-            description,
-            start_date_time,
-            end_date_time,
-            location,
-            organizer,
-            max_participants,
-            current_participants,
-            status,
-            created_at,
-            updated_at
+            <include refid="baseSelectFields"/>
         FROM events
         ORDER BY created_at DESC
     </select>
 
-    <!-- Find Event by ID -->
+    <!-- Select Event by ID -->
     <select id="findById" resultMap="EventResultMap">
         SELECT 
-            event_id,
-            event_name,
-            description,
-            start_date_time,
-            end_date_time,
-            location,
-            organizer,
-            max_participants,
-            current_participants,
-            status,
-            created_at,
-            updated_at
+            <include refid="baseSelectFields"/>
         FROM events
         WHERE event_id = #{eventId}
     </select>
 
-    <!-- Find Events by Status -->
+    <!-- Select Events by Status -->
     <select id="findByStatus" resultMap="EventResultMap">
         SELECT 
-            event_id,
-            event_name,
-            description,
-            start_date_time,
-            end_date_time,
-            location,
-            organizer,
-            max_participants,
-            current_participants,
-            status,
-            created_at,
-            updated_at
+            <include refid="baseSelectFields"/>
         FROM events
         WHERE status = #{status}
-        ORDER BY start_date_time
+        ORDER BY created_at DESC
     </select>
 
-    <!-- Find Events by Organizer -->
+    <!-- Select Events by Organizer -->
     <select id="findByOrganizer" resultMap="EventResultMap">
         SELECT 
-            event_id,
-            event_name,
-            description,
-            start_date_time,
-            end_date_time,
-            location,
-            organizer,
-            max_participants,
-            current_participants,
-            status,
-            created_at,
-            updated_at
+            <include refid="baseSelectFields"/>
         FROM events
         WHERE organizer = #{organizer}
-        ORDER BY start_date_time
+        ORDER BY created_at DESC
     </select>
 
     <!-- Insert Event -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="eventId">
         INSERT INTO events (
-            event_name,
-            description,
-            start_date_time,
-            end_date_time,
-            location,
-            organizer,
-            max_participants,
-            current_participants,
-            status,
-            created_at,
-            updated_at
+            event_name, description, start_date_time, end_date_time, 
+            location, organizer, max_participants, current_participants, 
+            status, created_at, updated_at
         ) VALUES (
-            #{eventName},
-            #{description},
-            #{startDateTime},
-            #{endDateTime},
-            #{location},
-            #{organizer},
-            #{maxParticipants},
-            #{currentParticipants},
-            #{status},
-            #{createdAt},
-            #{updatedAt}
+            #{eventName}, #{description}, #{startDateTime}, #{endDateTime}, 
+            #{location}, #{organizer}, #{maxParticipants}, #{currentParticipants}, 
+            #{status}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
         )
     </insert>
 
@@ -138,23 +100,35 @@
             max_participants = #{maxParticipants},
             current_participants = #{currentParticipants},
             status = #{status},
-            updated_at = #{updatedAt}
+            updated_at = CURRENT_TIMESTAMP
         WHERE event_id = #{eventId}
     </update>
 
-    <!-- Delete Event by ID -->
+    <!-- Delete Event -->
     <delete id="deleteById">
         DELETE FROM events WHERE event_id = #{eventId}
     </delete>
 
-    <!-- Count All Events -->
-    <select id="countAll" resultType="int">
+    <!-- Count Events -->
+    <select id="count" resultType="int">
         SELECT COUNT(*) FROM events
     </select>
 
     <!-- Count Events by Status -->
     <select id="countByStatus" resultType="int">
         SELECT COUNT(*) FROM events WHERE status = #{status}
+    </select>
+
+    <!-- Statistics Query -->
+    <select id="getStatistics" resultType="java.util.Map">
+        SELECT 
+            COUNT(*) as total_events,
+            SUM(CASE WHEN status = 'ACTIVE' THEN 1 ELSE 0 END) as active_events,
+            SUM(CASE WHEN status = 'COMPLETED' THEN 1 ELSE 0 END) as completed_events,
+            SUM(CASE WHEN status = 'CANCELLED' THEN 1 ELSE 0 END) as cancelled_events,
+            SUM(current_participants) as total_participants,
+            AVG(current_participants) as avg_participants
+        FROM events
     </select>
 
 </mapper>
