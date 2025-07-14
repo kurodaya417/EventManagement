@@ -19,7 +19,7 @@
     <description>Event Management Application with Spring Boot, MyBatis, and Oracle</description>
 
     <properties>
-        <java.version>21</java.version>
+        <java.version>17</java.version>
         <mybatis.version>3.0.2</mybatis.version>
         <oracle.version>21.5.0.0</oracle.version>
     </properties>
