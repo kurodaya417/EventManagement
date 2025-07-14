@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.eventapp.repository.EventRepository">
+
+    <resultMap id="EventResultMap" type="com.example.eventapp.model.Event">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="description" column="description"/>
+        <result property="eventDate" column="event_date"/>
+        <result property="location" column="location"/>
+        <result property="capacity" column="capacity"/>
+        <result property="currentParticipants" column="current_participants"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 全イベント取得 -->
+    <select id="findAll" resultMap="EventResultMap">
+        SELECT 
+            id, title, description, event_date, location, 
+            capacity, current_participants, created_at, updated_at
+        FROM event
+        ORDER BY event_date ASC
+    </select>
+
+    <!-- IDによるイベント取得 -->
+    <select id="findById" parameterType="long" resultMap="EventResultMap">
+        SELECT 
+            id, title, description, event_date, location, 
+            capacity, current_participants, created_at, updated_at
+        FROM event
+        WHERE id = #{id}
+    </select>
+
+    <!-- イベント作成 -->
+    <insert id="insert" parameterType="com.example.eventapp.model.Event" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO event (
+            title, description, event_date, location, 
+            capacity, current_participants, created_at, updated_at
+        ) VALUES (
+            #{title}, #{description}, #{eventDate}, #{location}, 
+            #{capacity}, #{currentParticipants}, #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <!-- イベント更新 -->
+    <update id="update" parameterType="com.example.eventapp.model.Event">
+        UPDATE event SET
+            title = #{title},
+            description = #{description},
+            event_date = #{eventDate},
+            location = #{location},
+            capacity = #{capacity},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <!-- イベント削除 -->
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM event WHERE id = #{id}
+    </delete>
+
+    <!-- 参加者数更新 -->
+    <update id="updateParticipantCount">
+        UPDATE event SET
+            current_participants = #{count}
+        WHERE id = #{id}
+    </update>
+
+</mapper>
