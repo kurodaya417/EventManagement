@@ -13,7 +13,7 @@ Azure App Service、Oracle Database、Blob Storage、AD B2C連携の実験対象
 
 ## 概要
 
-このプロジェクトは、イベント管理システムの完全なバックエンドAPIを提供します。REST APIベースで、イベントの作成、更新、削除、検索機能を提供します。
+このプロジェクトは、イベント管理システムの完全なバックエンドAPIを提供します。REST APIベースで、イベントの作成、更新、削除、検索機能に加えて、参加者の登録・キャンセル・一覧取得機能を提供します。
 
 ## 🚀 実装済み機能
 
@@ -21,6 +21,7 @@ Azure App Service、Oracle Database、Blob Storage、AD B2C連携の実験対象
 - ✅ ステータス別イベント検索（ACTIVE, COMPLETED, CANCELLED）
 - ✅ 主催者別イベント検索
 - ✅ イベント統計情報
+- ✅ 参加者管理機能（参加登録・キャンセル・一覧取得）
 - ✅ OpenAPI/Swagger ドキュメント生成
 - ✅ バリデーション機能
 - ✅ エラーハンドリング
@@ -63,6 +64,11 @@ http://localhost:8080/api
 | POST | `/events` | イベント作成 |
 | PUT | `/events/{id}` | イベント更新 |
 | DELETE | `/events/{id}` | イベント削除 |
+| GET | `/participants/event/{eventId}` | イベント参加者一覧取得 |
+| GET | `/participants/participant/{email}` | 参加者のイベント一覧取得 |
+| POST | `/participants/register` | 参加者登録 |
+| DELETE | `/participants/cancel/{participationId}` | 参加キャンセル |
+| DELETE | `/participants/cancel/event/{eventId}/email/{email}` | 参加キャンセル（イベント・メール指定） |
 
 ## 📂 実装済みディレクトリ構成
 
@@ -70,28 +76,37 @@ http://localhost:8080/api
 src/
 ├── main/java/com/eventmanagement/
 │   ├── controller/
-│   │   └── EventController.java          # REST Controllers
+│   │   ├── EventController.java          # Event REST Controllers
+│   │   └── ParticipantController.java    # Participant REST Controllers
 │   ├── service/
-│   │   └── EventService.java            # Business Logic
+│   │   ├── EventService.java            # Event Business Logic
+│   │   └── ParticipantService.java      # Participant Business Logic
 │   ├── mapper/
-│   │   └── EventMapper.java             # MyBatis Mappers
+│   │   ├── EventMapper.java             # Event MyBatis Mappers
+│   │   └── ParticipantMapper.java       # Participant MyBatis Mappers
 │   ├── entity/
-│   │   └── Event.java                   # Domain Models
+│   │   ├── Event.java                   # Event Domain Model
+│   │   └── Participant.java             # Participant Domain Model
 │   ├── dto/
-│   │   ├── EventRequest.java            # Request DTOs
-│   │   └── ApiResponse.java             # Response DTOs
+│   │   ├── EventRequest.java            # Event Request DTOs
+│   │   ├── EventResponse.java           # Event Response DTOs
+│   │   ├── ParticipantRequest.java      # Participant Request DTOs
+│   │   ├── ParticipantResponse.java     # Participant Response DTOs
+│   │   └── ApiResponse.java             # Common Response DTOs
 │   ├── config/
 │   │   └── SwaggerConfig.java           # Configuration Classes
 │   └── EventManagementApplication.java  # Main Application
 ├── resources/
 │   ├── mappers/
-│   │   └── EventMapper.xml              # MyBatis XML Mappers
+│   │   ├── EventMapper.xml              # Event MyBatis XML Mappers
+│   │   └── ParticipationMapper.xml      # Participant MyBatis XML Mappers
 │   ├── schema.sql                       # Database Schema
 │   └── application.properties           # Application Configuration
 └── test/
     └── java/com/eventmanagement/
         └── controller/
-            └── EventControllerTest.java  # Controller Tests
+            ├── EventControllerTest.java  # Event Controller Tests
+            └── ParticipantControllerTest.java # Participant Controller Tests
 ```
 
 ## 🛠️ セットアップ手順
@@ -170,6 +185,31 @@ curl -X POST http://localhost:8080/api/events \
 curl http://localhost:8080/api/events
 ```
 
+### 参加者登録
+
+```bash
+curl -X POST http://localhost:8080/api/participants/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "eventId": 1,
+    "participantName": "山田太郎",
+    "participantEmail": "yamada@example.com",
+    "participantPhone": "090-1234-5678"
+  }'
+```
+
+### イベント参加者一覧取得
+
+```bash
+curl http://localhost:8080/api/participants/event/1
+```
+
+### 参加キャンセル
+
+```bash
+curl -X DELETE http://localhost:8080/api/participants/cancel/event/1/email/yamada@example.com
+```
+
 ## 💾 データベーススキーマ
 
 ```sql
@@ -199,6 +239,29 @@ BEGIN
   :NEW.event_id := event_seq.NEXTVAL;
   :NEW.created_at := CURRENT_TIMESTAMP;
   :NEW.updated_at := CURRENT_TIMESTAMP;
+END;
+
+-- 参加者テーブル
+CREATE TABLE participants (
+    participation_id NUMBER(19) PRIMARY KEY,
+    event_id NUMBER(19) NOT NULL,
+    participant_name VARCHAR2(100) NOT NULL,
+    participant_email VARCHAR2(255) NOT NULL,
+    participant_phone VARCHAR2(20),
+    registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_participants_event FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE,
+    CONSTRAINT uk_participants_event_email UNIQUE (event_id, participant_email)
+);
+
+-- 参加者IDシーケンス
+CREATE SEQUENCE participation_id_seq START WITH 1 INCREMENT BY 1;
+
+-- 参加者IDトリガー
+CREATE OR REPLACE TRIGGER participation_id_trigger
+  BEFORE INSERT ON participants
+  FOR EACH ROW
+BEGIN
+  :NEW.participation_id := participation_id_seq.NEXTVAL;
 END;
 ```
 
@@ -246,10 +309,10 @@ curl http://localhost:8080/api/actuator/info
 - [x] バリデーション機能
 - [x] エラーハンドリング
 - [x] 統計情報API
+- [x] 参加者管理機能（/api/participants）
 
 ### 計画中 📋
 - [ ] UIデザイン案の実装
-- [ ] 参加者管理機能（/api/participation）
 - [ ] Azureへのデプロイ手順の整備
 - [ ] 検索機能の拡張
 - [ ] CSV出力機能の追加
