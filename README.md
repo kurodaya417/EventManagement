@@ -20,6 +20,7 @@ Azure App Service、Oracle Database、Blob Storage、AD B2C連携の実験対象
 - ✅ イベント管理（CRUD操作）
 - ✅ ステータス別イベント検索（ACTIVE, COMPLETED, CANCELLED）
 - ✅ 主催者別イベント検索
+- ✅ 拡張検索機能（キーワード、日付範囲、複数条件、ページネーション、ソート）
 - ✅ イベント統計情報
 - ✅ 参加者管理機能（参加登録・キャンセル・一覧取得）
 - ✅ OpenAPI/Swagger ドキュメント生成
@@ -60,6 +61,7 @@ http://localhost:8080/api
 | GET | `/events/{id}` | イベント詳細取得 |
 | GET | `/events/status/{status}` | ステータス別イベント取得 |
 | GET | `/events/organizer/{organizer}` | 主催者別イベント取得 |
+| POST | `/events/search` | 拡張検索（キーワード、日付範囲、複数条件、ページネーション）|
 | GET | `/events/statistics` | イベント統計取得 |
 | POST | `/events` | イベント作成 |
 | PUT | `/events/{id}` | イベント更新 |
@@ -183,6 +185,25 @@ curl -X POST http://localhost:8080/api/events \
 
 ```bash
 curl http://localhost:8080/api/events
+```
+
+### 拡張検索機能
+
+```bash
+curl -X POST http://localhost:8080/api/events/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "keyword": "Spring Boot",
+    "status": "ACTIVE",
+    "organizer": "John",
+    "location": "Conference Room",
+    "startDateFrom": "2024-01-01T00:00:00",
+    "startDateTo": "2024-12-31T23:59:59",
+    "page": 0,
+    "size": 10,
+    "sortBy": "startDateTime",
+    "sortOrder": "asc"
+  }'
 ```
 
 ### 参加者登録
@@ -310,11 +331,11 @@ curl http://localhost:8080/api/actuator/info
 - [x] エラーハンドリング
 - [x] 統計情報API
 - [x] 参加者管理機能（/api/participants）
+- [x] 検索機能の拡張（キーワード、日付範囲、複数条件、ページネーション）
 
 ### 計画中 📋
 - [ ] UIデザイン案の実装
 - [ ] Azureへのデプロイ手順の整備
-- [ ] 検索機能の拡張
 - [ ] CSV出力機能の追加
 - [ ] Azure AD B2C連携
 - [ ] Blob Storage連携

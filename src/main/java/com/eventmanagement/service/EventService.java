@@ -2,6 +2,8 @@ package com.eventmanagement.service;
 
 import com.eventmanagement.dto.EventRequest;
 import com.eventmanagement.dto.EventResponse;
+import com.eventmanagement.dto.EventSearchRequest;
+import com.eventmanagement.dto.EventSearchResult;
 import com.eventmanagement.entity.Event;
 import com.eventmanagement.mapper.EventMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -167,6 +169,27 @@ public class EventService {
         
         return new EventStatistics(totalEvents, activeEvents, completedEvents, cancelledEvents);
     }
+    
+    /**
+     * Search events with advanced criteria
+     * 
+     * @param searchRequest Search criteria
+     * @return Event search result with pagination
+     */
+    public EventSearchResult searchEvents(EventSearchRequest searchRequest) {
+        validateSearchRequest(searchRequest);
+        
+        // Get total count for pagination
+        int totalCount = eventMapper.countSearchEvents(searchRequest);
+        
+        // Get events for current page
+        List<Event> events = eventMapper.searchEvents(searchRequest);
+        List<EventResponse> eventResponses = events.stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+        
+        return new EventSearchResult(eventResponses, totalCount, searchRequest.getPage(), searchRequest.getSize());
+    }
 
     /**
      * Update participant count for an event
@@ -219,6 +242,54 @@ public class EventService {
         
         if (request.getStartDateTime().isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("Start date/time must be in the future");
+        }
+    }
+    
+    /**
+     * Validate search request
+     * 
+     * @param searchRequest Search request
+     * @throws IllegalArgumentException if validation fails
+     */
+    private void validateSearchRequest(EventSearchRequest searchRequest) {
+        if (searchRequest.getStartDateFrom() != null && searchRequest.getStartDateTo() != null) {
+            if (searchRequest.getStartDateFrom().isAfter(searchRequest.getStartDateTo())) {
+                throw new IllegalArgumentException("Start date 'from' must be before start date 'to'");
+            }
+        }
+        
+        if (searchRequest.getEndDateFrom() != null && searchRequest.getEndDateTo() != null) {
+            if (searchRequest.getEndDateFrom().isAfter(searchRequest.getEndDateTo())) {
+                throw new IllegalArgumentException("End date 'from' must be before end date 'to'");
+            }
+        }
+        
+        if (searchRequest.getPage() < 0) {
+            throw new IllegalArgumentException("Page number must be non-negative");
+        }
+        
+        if (searchRequest.getSize() < 1) {
+            throw new IllegalArgumentException("Page size must be at least 1");
+        }
+        
+        if (searchRequest.getSize() > 100) {
+            throw new IllegalArgumentException("Page size cannot exceed 100");
+        }
+        
+        String[] validSortFields = {"eventName", "startDateTime", "endDateTime", "location", "organizer", "status", "createdAt", "updatedAt"};
+        boolean validSortBy = false;
+        for (String field : validSortFields) {
+            if (field.equals(searchRequest.getSortBy())) {
+                validSortBy = true;
+                break;
+            }
+        }
+        if (!validSortBy) {
+            throw new IllegalArgumentException("Invalid sort field: " + searchRequest.getSortBy());
+        }
+        
+        if (!"asc".equalsIgnoreCase(searchRequest.getSortOrder()) && !"desc".equalsIgnoreCase(searchRequest.getSortOrder())) {
+            throw new IllegalArgumentException("Sort order must be 'asc' or 'desc'");
         }
     }
 

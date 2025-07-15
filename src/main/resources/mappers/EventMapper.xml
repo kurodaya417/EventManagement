@@ -28,16 +28,85 @@
     <!-- Base Where Clause -->
     <sql id="baseWhereClause">
         <where>
-            <if test="status != null">
+            <if test="status != null and status != ''">
                 AND status = #{status}
             </if>
-            <if test="organizer != null">
+            <if test="organizer != null and organizer != ''">
                 AND organizer = #{organizer}
             </if>
-            <if test="eventName != null">
+            <if test="eventName != null and eventName != ''">
                 AND event_name LIKE '%' || #{eventName} || '%'
             </if>
         </where>
+    </sql>
+    
+    <!-- Advanced Search Where Clause -->
+    <sql id="searchWhereClause">
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (event_name LIKE '%' || #{keyword} || '%' OR description LIKE '%' || #{keyword} || '%')
+            </if>
+            <if test="status != null and status != ''">
+                AND status = #{status}
+            </if>
+            <if test="organizer != null and organizer != ''">
+                AND organizer LIKE '%' || #{organizer} || '%'
+            </if>
+            <if test="location != null and location != ''">
+                AND location LIKE '%' || #{location} || '%'
+            </if>
+            <if test="startDateFrom != null">
+                AND start_date_time >= #{startDateFrom}
+            </if>
+            <if test="startDateTo != null">
+                AND start_date_time <= #{startDateTo}
+            </if>
+            <if test="endDateFrom != null">
+                AND end_date_time >= #{endDateFrom}
+            </if>
+            <if test="endDateTo != null">
+                AND end_date_time <= #{endDateTo}
+            </if>
+        </where>
+    </sql>
+    
+    <!-- Order By Clause -->
+    <sql id="orderByClause">
+        ORDER BY
+        <choose>
+            <when test="sortBy == 'eventName'">
+                event_name
+            </when>
+            <when test="sortBy == 'startDateTime'">
+                start_date_time
+            </when>
+            <when test="sortBy == 'endDateTime'">
+                end_date_time
+            </when>
+            <when test="sortBy == 'location'">
+                location
+            </when>
+            <when test="sortBy == 'organizer'">
+                organizer
+            </when>
+            <when test="sortBy == 'status'">
+                status
+            </when>
+            <when test="sortBy == 'updatedAt'">
+                updated_at
+            </when>
+            <otherwise>
+                created_at
+            </otherwise>
+        </choose>
+        <choose>
+            <when test="sortOrder == 'asc'">
+                ASC
+            </when>
+            <otherwise>
+                DESC
+            </otherwise>
+        </choose>
     </sql>
 
     <!-- Select All Events -->
@@ -129,6 +198,26 @@
             SUM(current_participants) as total_participants,
             AVG(current_participants) as avg_participants
         FROM events
+    </select>
+    
+    <!-- Search Events with Advanced Criteria -->
+    <select id="searchEvents" resultMap="EventResultMap">
+        SELECT 
+            <include refid="baseSelectFields"/>
+        FROM events
+        <include refid="searchWhereClause"/>
+        <include refid="orderByClause"/>
+        <![CDATA[
+        OFFSET #{offset} ROWS
+        FETCH NEXT #{size} ROWS ONLY
+        ]]>
+    </select>
+    
+    <!-- Count Events matching search criteria -->
+    <select id="countSearchEvents" resultType="int">
+        SELECT COUNT(*)
+        FROM events
+        <include refid="searchWhereClause"/>
     </select>
 
 </mapper>
