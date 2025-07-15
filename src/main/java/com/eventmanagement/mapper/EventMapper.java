@@ -1,5 +1,6 @@
 package com.eventmanagement.mapper;
 
+import com.eventmanagement.dto.EventSearchRequest;
 import com.eventmanagement.entity.Event;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -82,4 +83,20 @@ public interface EventMapper {
      * @return Number of events with specified status
      */
     int countByStatus(@Param("status") String status);
+    
+    /**
+     * Search events with advanced criteria
+     * 
+     * @param searchRequest Search criteria
+     * @return List of events matching the search criteria
+     */
+    List<Event> searchEvents(EventSearchRequest searchRequest);
+    
+    /**
+     * Count events matching search criteria
+     * 
+     * @param searchRequest Search criteria
+     * @return Total number of events matching the search criteria
+     */
+    int countSearchEvents(EventSearchRequest searchRequest);
 }

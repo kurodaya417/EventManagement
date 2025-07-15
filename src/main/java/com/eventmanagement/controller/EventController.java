@@ -3,6 +3,8 @@ package com.eventmanagement.controller;
 import com.eventmanagement.dto.ApiResponse;
 import com.eventmanagement.dto.EventRequest;
 import com.eventmanagement.dto.EventResponse;
+import com.eventmanagement.dto.EventSearchRequest;
+import com.eventmanagement.dto.EventSearchResult;
 import com.eventmanagement.service.EventService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -239,6 +241,34 @@ public class EventController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(ApiResponse.error("Failed to retrieve statistics: " + e.getMessage()));
+        }
+    }
+    
+    /**
+     * Search events with advanced criteria
+     * 
+     * @param searchRequest Search criteria
+     * @return Paginated search results
+     */
+    @PostMapping("/search")
+    @Operation(summary = "Search events", description = "Search events with advanced criteria including text search, date ranges, and pagination")
+    @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "Successfully retrieved search results"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "400", description = "Invalid search criteria"),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<ApiResponse<EventSearchResult>> searchEvents(
+            @Parameter(description = "Search criteria", required = true)
+            @Valid @RequestBody EventSearchRequest searchRequest) {
+        try {
+            EventSearchResult searchResult = eventService.searchEvents(searchRequest);
+            return ResponseEntity.ok(ApiResponse.success("Search completed successfully", searchResult));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error("Invalid search criteria: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(ApiResponse.error("Failed to search events: " + e.getMessage()));
         }
     }
 }
