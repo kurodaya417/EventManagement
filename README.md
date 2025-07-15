@@ -136,7 +136,7 @@ Oracle Databaseを起動し、以下のスクリプトを実行してスキー�
 `src/main/resources/application.properties` でデータベース接続情報を設定:
 
 ```properties
-spring.datasource.url=jdbc:oracle:thin:@localhost:1521:xe
+spring.datasource.url=jdbc:oracle:thin:@localhost:1521/XEPDB1
 spring.datasource.username=your_username
 spring.datasource.password=your_password
 ```
