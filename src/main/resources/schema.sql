@@ -104,5 +104,58 @@ CREATE INDEX idx_participants_event_id ON participants(event_id);
 CREATE INDEX idx_participants_email ON participants(participant_email);
 CREATE INDEX idx_participants_registered_at ON participants(registered_at);
 
+-- Create sequence for user_id
+CREATE SEQUENCE user_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
+
+-- Create users table for authentication
+CREATE TABLE users (
+    user_id NUMBER(19) PRIMARY KEY,
+    username VARCHAR2(50) UNIQUE NOT NULL,
+    password VARCHAR2(100) NOT NULL,
+    email VARCHAR2(255) UNIQUE NOT NULL,
+    full_name VARCHAR2(100) NOT NULL,
+    role VARCHAR2(20) DEFAULT 'USER' CHECK (role IN ('USER', 'ADMIN')),
+    enabled NUMBER(1) DEFAULT 1 CHECK (enabled IN (0, 1)),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create trigger for auto-increment user_id
+CREATE OR REPLACE TRIGGER user_id_trigger
+    BEFORE INSERT ON users
+    FOR EACH ROW
+BEGIN
+    IF :NEW.user_id IS NULL THEN
+        :NEW.user_id := user_id_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+-- Create trigger for auto-update updated_at
+CREATE OR REPLACE TRIGGER users_updated_at_trigger
+    BEFORE UPDATE ON users
+    FOR EACH ROW
+BEGIN
+    :NEW.updated_at := CURRENT_TIMESTAMP;
+END;
+/
+
+-- Create indexes for better performance
+CREATE INDEX idx_users_username ON users(username);
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_role ON users(role);
+
+-- Insert default admin user (password: admin123)
+INSERT INTO users (username, password, email, full_name, role, enabled)
+VALUES ('admin', '$2a$10$UqPf7ixhdZHEez817SCpWeKDqIEZ.Yiz8s0J2pmu9xDj9l0NzUO2q', 'admin@eventmanagement.com', 'System Administrator', 'ADMIN', 1);
+
+-- Insert default user (password: user123)
+INSERT INTO users (username, password, email, full_name, role, enabled)
+VALUES ('user', '$2a$10$rNMiiElMhYWXxk0tv3n4KON/qrBHAlx5j/yV1gC1g4JXki50c24Fq', 'user@eventmanagement.com', 'Regular User', 'USER', 1);
+
 -- Commit the changes
 COMMIT;

@@ -10,6 +10,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class WebController {
 
     /**
+     * Serve the login page
+     */
+    @GetMapping("/login")
+    public String login() {
+        return "forward:/login.html";
+    }
+    
+    /**
+     * Serve the register page
+     */
+    @GetMapping("/register")
+    public String register() {
+        return "forward:/register.html";
+    }
+
+    /**
      * Serve the main UI application
      */
     @GetMapping("/")
