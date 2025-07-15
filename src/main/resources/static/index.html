@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>イベント管理システム</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">
+                <i class="fas fa-calendar-alt"></i>
+                イベント管理システム
+            </h1>
+            <nav class="nav">
+                <button class="nav-btn active" data-view="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    ダッシュボード
+                </button>
+                <button class="nav-btn" data-view="events">
+                    <i class="fas fa-calendar-check"></i>
+                    イベント一覧
+                </button>
+                <button class="nav-btn" data-view="create-event">
+                    <i class="fas fa-plus"></i>
+                    イベント作成
+                </button>
+                <button class="nav-btn" data-view="statistics">
+                    <i class="fas fa-chart-bar"></i>
+                    統計
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <!-- Dashboard View -->
+            <div id="dashboard-view" class="view active">
+                <div class="dashboard-header">
+                    <h2>ダッシュボード</h2>
+                    <p>イベント管理システムの概要</p>
+                </div>
+                
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="total-events">0</h3>
+                            <p>総イベント数</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="active-events">0</h3>
+                            <p>アクティブイベント</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="total-participants">0</h3>
+                            <p>総参加者数</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-calendar-times"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="upcoming-events">0</h3>
+                            <p>今後のイベント</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="recent-events">
+                    <h3>最近のイベント</h3>
+                    <div id="recent-events-list" class="event-list"></div>
+                </div>
+            </div>
+
+            <!-- Events List View -->
+            <div id="events-view" class="view">
+                <div class="view-header">
+                    <h2>イベント一覧</h2>
+                    <div class="view-actions">
+                        <button class="btn btn-primary" id="create-event-btn">
+                            <i class="fas fa-plus"></i>
+                            新規イベント
+                        </button>
+                    </div>
+                </div>
+
+                <div class="search-filters">
+                    <div class="filter-group">
+                        <input type="text" id="search-keyword" placeholder="キーワードで検索...">
+                        <select id="status-filter">
+                            <option value="">すべてのステータス</option>
+                            <option value="ACTIVE">アクティブ</option>
+                            <option value="COMPLETED">完了</option>
+                            <option value="CANCELLED">キャンセル</option>
+                        </select>
+                        <input type="date" id="date-from" placeholder="開始日">
+                        <input type="date" id="date-to" placeholder="終了日">
+                        <button class="btn btn-secondary" id="search-btn">
+                            <i class="fas fa-search"></i>
+                            検索
+                        </button>
+                        <button class="btn btn-outline" id="clear-filters">
+                            <i class="fas fa-times"></i>
+                            クリア
+                        </button>
+                    </div>
+                </div>
+
+                <div id="events-list" class="event-list"></div>
+                
+                <div class="pagination">
+                    <button class="btn btn-outline" id="prev-page">
+                        <i class="fas fa-chevron-left"></i>
+                        前へ
+                    </button>
+                    <span id="page-info">ページ 1 / 1</span>
+                    <button class="btn btn-outline" id="next-page">
+                        次へ
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Create/Edit Event View -->
+            <div id="create-event-view" class="view">
+                <div class="view-header">
+                    <h2 id="form-title">新規イベント作成</h2>
+                </div>
+
+                <form id="event-form" class="event-form">
+                    <div class="form-group">
+                        <label for="event-name">イベント名 *</label>
+                        <input type="text" id="event-name" name="eventName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="event-description">説明</label>
+                        <textarea id="event-description" name="description" rows="4"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="start-datetime">開始日時 *</label>
+                            <input type="datetime-local" id="start-datetime" name="startDateTime" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="end-datetime">終了日時 *</label>
+                            <input type="datetime-local" id="end-datetime" name="endDateTime" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location">場所 *</label>
+                        <input type="text" id="location" name="location" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="organizer">主催者 *</label>
+                            <input type="text" id="organizer" name="organizer" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="max-participants">最大参加者数 *</label>
+                            <input type="number" id="max-participants" name="maxParticipants" min="1" required>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" id="cancel-btn">
+                            <i class="fas fa-times"></i>
+                            キャンセル
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i>
+                            保存
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Statistics View -->
+            <div id="statistics-view" class="view">
+                <div class="view-header">
+                    <h2>統計情報</h2>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card large">
+                        <h3>イベント統計</h3>
+                        <div id="event-stats" class="stat-details"></div>
+                    </div>
+                    <div class="stat-card large">
+                        <h3>参加者統計</h3>
+                        <div id="participant-stats" class="stat-details"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Event Detail Modal -->
+    <div id="event-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">イベント詳細</h3>
+                <button class="close-btn" id="close-modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="event-details"></div>
+                <div id="participants-section">
+                    <h4>参加者リスト</h4>
+                    <div id="participants-list"></div>
+                </div>
+                <div id="register-section">
+                    <h4>新規参加者登録</h4>
+                    <form id="participant-form">
+                        <div class="form-group">
+                            <label for="participant-name">参加者名 *</label>
+                            <input type="text" id="participant-name" name="participantName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="participant-email">メールアドレス *</label>
+                            <input type="email" id="participant-email" name="participantEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="participant-phone">電話番号</label>
+                            <input type="tel" id="participant-phone" name="participantPhone">
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-user-plus"></i>
+                            参加登録
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div id="loading" class="loading-overlay">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
