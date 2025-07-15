@@ -41,7 +41,7 @@
     <insert id="insert" useGeneratedKeys="true" keyProperty="userId">
         INSERT INTO users (username, password, email, full_name, role, enabled, created_at, updated_at)
         VALUES (#{username}, #{password}, #{email}, #{fullName}, #{role}, #{enabled}, 
-                CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                NOW(), NOW())
     </insert>
 
     <update id="update">
@@ -52,7 +52,7 @@
             full_name = #{fullName},
             role = #{role},
             enabled = #{enabled},
-            updated_at = CURRENT_TIMESTAMP
+            updated_at = NOW()
         WHERE user_id = #{userId}
     </update>
 
@@ -60,14 +60,14 @@
         DELETE FROM users WHERE user_id = #{userId}
     </delete>
 
-    <select id="existsByUsername" resultType="boolean">
-        SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+    <select id="existsByUsername" resultType="java.lang.Boolean">
+        SELECT CASE WHEN COUNT(*) &gt; 0 THEN 1 ELSE 0 END
         FROM users
         WHERE username = #{username}
     </select>
 
-    <select id="existsByEmail" resultType="boolean">
-        SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END
+    <select id="existsByEmail" resultType="java.lang.Boolean">
+        SELECT CASE WHEN COUNT(*) &gt; 0 THEN 1 ELSE 0 END
         FROM users
         WHERE email = #{email}
     </select>

@@ -56,16 +56,16 @@
                 AND location LIKE '%' || #{location} || '%'
             </if>
             <if test="startDateFrom != null">
-                AND start_date_time >= #{startDateFrom}
+                AND start_date_time &gt;= #{startDateFrom}
             </if>
             <if test="startDateTo != null">
-                AND start_date_time <= #{startDateTo}
+                AND start_date_time &lt;= #{startDateTo}
             </if>
             <if test="endDateFrom != null">
-                AND end_date_time >= #{endDateFrom}
+                AND end_date_time &gt;= #{endDateFrom}
             </if>
             <if test="endDateTo != null">
-                AND end_date_time <= #{endDateTo}
+                AND end_date_time &lt;= #{endDateTo}
             </if>
         </where>
     </sql>

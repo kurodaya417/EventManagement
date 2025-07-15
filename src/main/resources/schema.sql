@@ -151,11 +151,11 @@ CREATE INDEX idx_users_role ON users(role);
 
 -- Insert default admin user (password: admin123)
 INSERT INTO users (username, password, email, full_name, role, enabled)
-VALUES ('admin', '$2a$10$J5G3BYQHrVONlEVP3x8/6uF8WNzPMgQNJuHbhzv9PcKnQcSzEtDQa', 'admin@eventmanagement.com', 'System Administrator', 'ADMIN', 1);
+VALUES ('admin', '$2a$10$UqPf7ixhdZHEez817SCpWeKDqIEZ.Yiz8s0J2pmu9xDj9l0NzUO2q', 'admin@eventmanagement.com', 'System Administrator', 'ADMIN', 1);
 
 -- Insert default user (password: user123)
 INSERT INTO users (username, password, email, full_name, role, enabled)
-VALUES ('user', '$2a$10$J5G3BYQHrVONlEVP3x8/6uF8WNzPMgQNJuHbhzv9PcKnQcSzEtDQa', 'user@eventmanagement.com', 'Regular User', 'USER', 1);
+VALUES ('user', '$2a$10$rNMiiElMhYWXxk0tv3n4KON/qrBHAlx5j/yV1gC1g4JXki50c24Fq', 'user@eventmanagement.com', 'Regular User', 'USER', 1);
 
 -- Commit the changes
 COMMIT;

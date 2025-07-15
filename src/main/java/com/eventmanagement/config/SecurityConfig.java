@@ -1,10 +1,7 @@
 package com.eventmanagement.config;
 
-import com.eventmanagement.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,9 +17,6 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 @EnableWebSecurity
 public class SecurityConfig {
     
-    @Autowired
-    private UserService userService;
-    
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -32,7 +26,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
+                .requestMatchers("/login*", "/register*", "/login.html", "/register.html", "/css/**", "/js/**", "/images/**", "/favicon.ico").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/events/**").hasAnyRole("USER", "ADMIN")
                 .requestMatchers("/api/participants/**").hasAnyRole("USER", "ADMIN")
@@ -41,13 +35,13 @@ public class SecurityConfig {
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .loginProcessingUrl("/api/auth/login")
+                .loginProcessingUrl("/login")
                 .successHandler(authenticationSuccessHandler())
                 .failureHandler(authenticationFailureHandler())
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutUrl("/api/auth/logout")
+                .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout")
                 .permitAll()
             )
@@ -60,12 +54,6 @@ public class SecurityConfig {
             );
         
         return http.build();
-    }
-    
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userService)
-            .passwordEncoder(passwordEncoder());
     }
     
     @Bean
