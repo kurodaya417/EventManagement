@@ -8,14 +8,88 @@ class EventManagementApp {
         this.currentEventId = null;
         this.events = [];
         this.statistics = {};
+        this.currentUser = null;
         
         this.init();
     }
 
-    init() {
+    async init() {
+        // Check authentication first
+        const isAuthenticated = await this.checkAuthentication();
+        if (!isAuthenticated) {
+            window.location.href = '/login';
+            return;
+        }
+        
         this.setupEventListeners();
         this.showView('dashboard');
         this.loadDashboard();
+    }
+
+    async checkAuthentication() {
+        try {
+            const response = await fetch('/api/auth/status');
+            const data = await response.json();
+            
+            if (data.authenticated) {
+                // Get user information
+                const userResponse = await fetch('/api/auth/me');
+                const userData = await userResponse.json();
+                
+                if (userData.success) {
+                    this.currentUser = userData;
+                    this.updateUserInterface();
+                    return true;
+                }
+            }
+            return false;
+        } catch (error) {
+            console.error('Authentication check failed:', error);
+            return false;
+        }
+    }
+
+    updateUserInterface() {
+        // Update user info in header
+        const userInfo = document.createElement('div');
+        userInfo.className = 'user-info';
+        userInfo.innerHTML = `
+            <span class="user-name">
+                <i class="fas fa-user"></i>
+                ${this.currentUser.fullName}
+            </span>
+            <button class="logout-btn" id="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                ログアウト
+            </button>
+        `;
+        
+        const headerNav = document.querySelector('.header .nav');
+        headerNav.appendChild(userInfo);
+        
+        // Add logout event listener
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            this.logout();
+        });
+    }
+
+    async logout() {
+        try {
+            const response = await fetch('/api/auth/logout', {
+                method: 'POST'
+            });
+            
+            if (response.ok) {
+                window.location.href = '/login?logout';
+            } else {
+                // Force logout by redirecting to login
+                window.location.href = '/login';
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            // Force logout by redirecting to login
+            window.location.href = '/login';
+        }
     }
 
     setupEventListeners() {
