@@ -48,6 +48,20 @@ public class EventService {
     }
 
     /**
+     * Get event entity by ID (for internal use)
+     * 
+     * @param eventId Event ID
+     * @return Event entity or throws exception if not found
+     */
+    public Event getEventEntityById(Long eventId) {
+        Event event = eventMapper.findById(eventId);
+        if (event == null) {
+            throw new RuntimeException("Event not found with ID: " + eventId);
+        }
+        return event;
+    }
+
+    /**
      * Get events by status
      * 
      * @param status Event status
@@ -152,6 +166,21 @@ public class EventService {
         int cancelledEvents = eventMapper.countByStatus("CANCELLED");
         
         return new EventStatistics(totalEvents, activeEvents, completedEvents, cancelledEvents);
+    }
+
+    /**
+     * Update participant count for an event
+     * 
+     * @param eventId Event ID
+     * @param currentCount Current participant count
+     */
+    public void updateParticipantCount(Long eventId, int currentCount) {
+        Event event = eventMapper.findById(eventId);
+        if (event != null) {
+            event.setCurrentParticipants(currentCount);
+            event.setUpdatedAt(LocalDateTime.now());
+            eventMapper.update(event);
+        }
     }
 
     /**

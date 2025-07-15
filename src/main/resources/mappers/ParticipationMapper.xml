@@ -2,10 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.example.eventapp.repository.ParticipationRepository">
+<mapper namespace="com.eventmanagement.mapper.ParticipantMapper">
 
-    <resultMap id="ParticipationResultMap" type="com.example.eventapp.model.Participation">
-        <id property="id" column="id"/>
+    <resultMap id="ParticipantResultMap" type="com.eventmanagement.entity.Participant">
+        <id property="participationId" column="participation_id"/>
         <result property="eventId" column="event_id"/>
         <result property="participantName" column="participant_name"/>
         <result property="participantEmail" column="participant_email"/>
@@ -13,19 +13,47 @@
         <result property="registeredAt" column="registered_at"/>
     </resultMap>
 
-    <!-- イベントIDによる参加者一覧取得 -->
-    <select id="findByEventId" parameterType="long" resultMap="ParticipationResultMap">
+    <!-- Find all participants for a specific event -->
+    <select id="findByEventId" parameterType="long" resultMap="ParticipantResultMap">
         SELECT 
-            id, event_id, participant_name, participant_email, 
+            participation_id, event_id, participant_name, participant_email, 
             participant_phone, registered_at
-        FROM participation
+        FROM participants
         WHERE event_id = #{eventId}
         ORDER BY registered_at ASC
     </select>
 
-    <!-- 参加登録 -->
-    <insert id="insert" parameterType="com.example.eventapp.model.Participation" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO participation (
+    <!-- Find all events for a specific participant -->
+    <select id="findByParticipantEmail" parameterType="string" resultMap="ParticipantResultMap">
+        SELECT 
+            participation_id, event_id, participant_name, participant_email, 
+            participant_phone, registered_at
+        FROM participants
+        WHERE participant_email = #{participantEmail}
+        ORDER BY registered_at DESC
+    </select>
+
+    <!-- Find participant by event ID and email (for duplicate check) -->
+    <select id="findByEventIdAndEmail" resultMap="ParticipantResultMap">
+        SELECT 
+            participation_id, event_id, participant_name, participant_email, 
+            participant_phone, registered_at
+        FROM participants
+        WHERE event_id = #{eventId} AND participant_email = #{participantEmail}
+    </select>
+
+    <!-- Find participant by participation ID -->
+    <select id="findById" parameterType="long" resultMap="ParticipantResultMap">
+        SELECT 
+            participation_id, event_id, participant_name, participant_email, 
+            participant_phone, registered_at
+        FROM participants
+        WHERE participation_id = #{participationId}
+    </select>
+
+    <!-- Insert new participant -->
+    <insert id="insert" parameterType="com.eventmanagement.entity.Participant" useGeneratedKeys="true" keyProperty="participationId">
+        INSERT INTO participants (
             event_id, participant_name, participant_email, 
             participant_phone, registered_at
         ) VALUES (
@@ -34,23 +62,19 @@
         )
     </insert>
 
-    <!-- 重複参加チェック -->
-    <select id="findByEventIdAndEmail" resultMap="ParticipationResultMap">
-        SELECT 
-            id, event_id, participant_name, participant_email, 
-            participant_phone, registered_at
-        FROM participation
-        WHERE event_id = #{eventId} AND participant_email = #{email}
-    </select>
-
-    <!-- 参加キャンセル -->
+    <!-- Delete participant by ID -->
     <delete id="deleteById" parameterType="long">
-        DELETE FROM participation WHERE id = #{id}
+        DELETE FROM participants WHERE participation_id = #{participationId}
     </delete>
 
-    <!-- イベントの参加者数カウント -->
+    <!-- Delete all participants for a specific event -->
+    <delete id="deleteByEventId" parameterType="long">
+        DELETE FROM participants WHERE event_id = #{eventId}
+    </delete>
+
+    <!-- Count participants for a specific event -->
     <select id="countByEventId" parameterType="long" resultType="int">
-        SELECT COUNT(*) FROM participation WHERE event_id = #{eventId}
+        SELECT COUNT(*) FROM participants WHERE event_id = #{eventId}
     </select>
 
 </mapper>
