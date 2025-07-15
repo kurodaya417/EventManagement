@@ -110,7 +110,7 @@
     </delete>
 
     <!-- Count Events -->
-    <select id="count" resultType="int">
+    <select id="countAll" resultType="int">
         SELECT COUNT(*) FROM events
     </select>
 
