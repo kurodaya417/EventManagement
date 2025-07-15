@@ -69,5 +69,40 @@ VALUES
      TIMESTAMP '2024-01-15 10:00:00', TIMESTAMP '2024-01-15 16:00:00', 
      'City Park', 'HR Department', 100, 85, 'COMPLETED');
 
+-- Create sequence for participation_id
+CREATE SEQUENCE participation_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NOCACHE
+    NOCYCLE;
+
+-- Create participants table
+CREATE TABLE participants (
+    participation_id NUMBER(19) PRIMARY KEY,
+    event_id NUMBER(19) NOT NULL,
+    participant_name VARCHAR2(100) NOT NULL,
+    participant_email VARCHAR2(255) NOT NULL,
+    participant_phone VARCHAR2(20),
+    registered_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_participants_event FOREIGN KEY (event_id) REFERENCES events(event_id) ON DELETE CASCADE,
+    CONSTRAINT uk_participants_event_email UNIQUE (event_id, participant_email)
+);
+
+-- Create trigger for auto-increment participation_id
+CREATE OR REPLACE TRIGGER participation_id_trigger
+    BEFORE INSERT ON participants
+    FOR EACH ROW
+BEGIN
+    IF :NEW.participation_id IS NULL THEN
+        :NEW.participation_id := participation_id_seq.NEXTVAL;
+    END IF;
+END;
+/
+
+-- Create indexes for better performance
+CREATE INDEX idx_participants_event_id ON participants(event_id);
+CREATE INDEX idx_participants_email ON participants(participant_email);
+CREATE INDEX idx_participants_registered_at ON participants(registered_at);
+
 -- Commit the changes
 COMMIT;
